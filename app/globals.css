@@ -173,3 +173,78 @@ html {
     background: #718096;
   }
 }
+
+/* Style untuk Native Banner Adsterra */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  margin: 20px 0 !important;
+  padding: 20px !important;
+}
+
+/* Pastikan teks di dalam banner terlihat */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 * {
+  color: white !important;
+  text-decoration: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Style untuk link di dalam banner */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 a {
+  color: #fbbf24 !important;
+  font-weight: bold !important;
+  transition: color 0.3s ease !important;
+}
+
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 a:hover {
+  color: #f59e0b !important;
+  text-decoration: underline !important;
+}
+
+/* Style untuk gambar di banner */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 img {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 0.3s ease !important;
+}
+
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 img:hover {
+  transform: scale(1.02) !important;
+}
+
+/* Style untuk judul */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 h1,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 h2,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 h3,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 h4 {
+  color: #fbbf24 !important;
+  font-weight: bold !important;
+  margin-bottom: 10px !important;
+}
+
+/* Style untuk teks biasa */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 p,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 span,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 div:not([class*="sponsored"]) {
+  color: rgba(255, 255, 255, 0.9) !important;
+  line-height: 1.5 !important;
+}
+
+/* Style untuk label sponsored */
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 .sponsored,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 .ad-label,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 .sponsored-label,
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 [class*="sponsored"],
+#container-45aeef9ea1ee8d947538a9ff8ebecd66 [class*="ad-"] {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  color: #93c5fd !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  display: inline-block !important;
+  margin-bottom: 10px !important;
+}
