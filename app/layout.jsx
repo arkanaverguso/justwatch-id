@@ -99,7 +99,7 @@ export default async function RootLayout({ children }) {
               <div className="max-w-7xl mx-auto px-4 flex justify-center">
                 <AdBanner 
                   adId="728x90_header"
-                  scriptKey="54496c6a700051d22076cb64af2ff32d"
+                  scriptKey="29ac0016876e4e46a9e1233dc926c568"
                   height={90} 
                   width={728}
                   className="rounded-lg overflow-hidden shadow-lg"
