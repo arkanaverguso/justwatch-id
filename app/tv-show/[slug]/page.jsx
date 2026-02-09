@@ -103,7 +103,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: tvShowData.name,
       description: tvShowData.overview,
-      url: `https://justwatch-id.vercel.app/tv-show/${slug}`,
+      url: `https://justwatch-us.vercel.app/tv-show/${slug}`,
       siteName: 'Justwatch',
       images: [{ url: socialImage, width: 1200, height: 630, alt: socialImageAlt }],
       locale: 'en_US',

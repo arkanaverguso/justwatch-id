@@ -1,5 +1,5 @@
 // app/sitemap.js - VERSI DIPERBAIKI DAN LENGKAP
-const BASE_URL = 'https://justwatch-id.vercel.app';
+const BASE_URL = 'https://justwatch-us.vercel.app';
 
 export default async function sitemap() {
   console.log('🎬 Generating dynamic sitemap for Justwatch...');

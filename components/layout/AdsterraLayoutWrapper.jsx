@@ -14,10 +14,10 @@ export default function AdsterraLayoutWrapper({ children, countryCode }) {
             optimizer.setGeo(countryCode);
         }
 
-        const nativeContainer = document.getElementById('container-45aeef9ea1ee8d947538a9ff8ebecd66');
+        const nativeContainer = document.getElementById('container-4a5705cdb7bbadd6a7add349c1b9a244');
 
         const visibleAds = [
-            { id: 'native', src: '//fundingfashioned.com/45aeef9ea1ee8d947538a9ff8ebecd66/invoke.js' },
+            { id: 'native', src: '//fundingfashioned.com/4a5705cdb7bbadd6a7add349c1b9a244/invoke.js' },
             { id: 'social', src: '//fundingfashioned.com/e0/88/53/e0885363b4640e0dc9c82e284031e7a1.js' }
         ];
 

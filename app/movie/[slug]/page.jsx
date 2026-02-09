@@ -104,7 +104,7 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title: movieData.title,
       description: movieData.overview || `Detailed information for movie ${movieData.title}`,
-      url: `https://justwatch-id.vercel.app/movie/${slug}`,
+      url: `https://justwatch-us.vercel.app/movie/${slug}`,
       siteName: 'Justwatch',
       images: [
         {

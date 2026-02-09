@@ -12,7 +12,7 @@ export const metadata = {
   openGraph: {
     title: 'Watch Movies Online Free | Stream TV Series HD - JustWatch',
     description: 'Find where to watch movies & TV series online for free or on Netflix, Disney+, Prime Video. Get streaming guides, actor profiles, and genre recommendations.',
-    url: 'https://justwatch-id.vercel.app',
+    url: 'https://justwatch-us.vercel.app',
     siteName: 'JustWatch',
     images: [
       {
@@ -49,7 +49,7 @@ export default async function RootLayout({ children }) {
       <head>
         <meta name="google-site-verification" content="7WZfh2aCtk9XQObziZk0EbqlvPuYo1qHULjMDlIUw-Y" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="canonical" href="https://justwatch-id.vercel.app" />
+        <link rel="canonical" href="https://justwatch-us.vercel.app" />
         
         {/* Structured Data untuk SEO */}
         <script
@@ -59,10 +59,10 @@ export default async function RootLayout({ children }) {
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "JustWatch",
-              "url": "https://justwatch-id.vercel.app",
+              "url": "https://justwatch-us.vercel.app",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://justwatch-id.vercel.app/search?q={search_term_string}",
+                "target": "https://justwatch-us.vercel.app/search?q={search_term_string}",
                 "query-input": "required name=search_term_string"
               },
               "description": "Find where to watch movies & TV series online for free or on Netflix, Disney+, Prime Video.",
@@ -77,7 +77,7 @@ export default async function RootLayout({ children }) {
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "JustWatch",
-              "url": "https://justwatch-id.vercel.app",
+              "url": "https://justwatch-us.vercel.app",
               "logo": "https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg",
               "description": "Streaming guide and movie database",
               "sameAs": [
@@ -112,7 +112,7 @@ export default async function RootLayout({ children }) {
             </main>
             
             <footer className="w-full max-w-7xl mx-auto px-4 py-8">
-              <div id="container-45aeef9ea1ee8d947538a9ff8ebecd66"></div>
+              <div id="container-4a5705cdb7bbadd6a7add349c1b9a244"></div>
               <Footer />
             </footer>
           </div>

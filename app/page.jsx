@@ -158,24 +158,24 @@ export default async function HomePage() {
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://justwatch-id.vercel.app/#website",
-        "url": "https://justwatch-id.vercel.app/",
+        "@id": "https://justwatch-us.vercel.app/#website",
+        "url": "https://justwatch-us.vercel.app/",
         "name": "JustWatch",
         "description": "Discover trending movies and TV series to stream today across Netflix, Disney+, Prime Video, Hulu, HBO Max and other streaming platforms",
         "potentialAction": [{
           "@type": "SearchAction",
-          "target": "https://justwatch-id.vercel.app/search?q={search_term_string}",
+          "target": "https://justwatch-us.vercel.app/search?q={search_term_string}",
           "query-input": "required name=search_term_string"
         }],
         "inLanguage": "en-US"
       },
       {
         "@type": "WebPage",
-        "@id": "https://justwatch-id.vercel.app/#webpage",
-        "url": "https://justwatch-id.vercel.app/",
+        "@id": "https://justwatch-us.vercel.app/#webpage",
+        "url": "https://justwatch-us.vercel.app/",
         "name": "JustWatch | Trending Movies & TV Shows to Stream Today",
         "description": "Watch trending movies and TV series for free. Discover what's popular today across Netflix, Disney+, Prime Video. Daily updated trending content.",
-        "isPartOf": { "@id": "https://justwatch-id.vercel.app/#website" },
+        "isPartOf": { "@id": "https://justwatch-us.vercel.app/#website" },
         "about": "Movie and TV show streaming guide",
         "primaryImageOfPage": {
           "@type": "ImageObject",
@@ -185,17 +185,17 @@ export default async function HomePage() {
         },
         "datePublished": "2024-01-01",
         "dateModified": new Date().toISOString().split('T')[0],
-        "breadcrumb": { "@id": "https://justwatch-id.vercel.app/#breadcrumb" }
+        "breadcrumb": { "@id": "https://justwatch-us.vercel.app/#breadcrumb" }
       },
       {
         "@type": "BreadcrumbList",
-        "@id": "https://justwatch-id.vercel.app/#breadcrumb",
+        "@id": "https://justwatch-us.vercel.app/#breadcrumb",
         "itemListElement": [
           {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://justwatch-id.vercel.app/"
+            "item": "https://justwatch-us.vercel.app/"
           }
         ]
       },
@@ -505,7 +505,7 @@ export const metadata = {
   openGraph: {
     title: 'JustWatch | Trending Movies & TV Shows to Stream Today',
     description: 'Discover what\'s trending today across all streaming platforms. Daily updated with the hottest movies and TV series available to watch online.',
-    url: 'https://justwatch-id.vercel.app/',
+    url: 'https://justwatch-us.vercel.app/',
     siteName: 'JustWatch',
     images: [
       {
@@ -527,7 +527,7 @@ export const metadata = {
     images: ['https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg'],
   },
   alternates: {
-    canonical: 'https://justwatch-id.vercel.app/',
+    canonical: 'https://justwatch-us.vercel.app/',
   },
 };
 
