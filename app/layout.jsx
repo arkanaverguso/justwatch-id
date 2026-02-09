@@ -47,7 +47,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <meta name="google-site-verification" content="43U0FE_9YdrByOFa7zNlMk0hxaMxt1P1zitJs_LBJFU" />
+        <meta name="google-site-verification" content="7WZfh2aCtk9XQObziZk0EbqlvPuYo1qHULjMDlIUw-Y" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="canonical" href="https://justwatch-id.vercel.app" />
         
