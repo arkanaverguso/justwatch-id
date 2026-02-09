@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
   const genre = genres.find(g => g.name.toLowerCase().replace(/\s/g, '-') === genreName);
   const title = genre?.name || 'Unknown';
 
-  const pageUrl = `https://Justwatch-id.vercel.app/movie/genre/${genreName}`;
+  const pageUrl = `https://justwatch-id.vercel.app/movie/genre/${genreName}`;
   const imageUrl = 'https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg';
 
   return {

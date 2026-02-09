@@ -1,389 +1,534 @@
-"use client";
-
 import React from 'react';
 import Link from 'next/link';
-import { FaHome, FaFilm, FaTv, FaSearch, FaStar, FaUsers, FaGlobe, FaUser, FaCalendar, FaTrophy } from 'react-icons/fa';
+import Image from 'next/image';
+import { FaFire, FaStar, FaTv, FaFilm, FaUser, FaTrophy, FaQuestionCircle, FaSearch, FaCalendarAlt, FaVideo } from 'react-icons/fa';
 
-export default function About() {
+// Data genre dari file awal dengan link yang benar
+const genres = [
+  { name: 'Action', link: '/movie/genre/action', color: 'text-orange-300' },
+  { name: 'Adventure', link: '/movie/genre/adventure', color: 'text-blue-300' },
+  { name: 'Sci-Fi', link: '/movie/genre/science-fiction', color: 'text-purple-300' },
+  { name: 'Anime', link: '/movie/genre/animation', color: 'text-pink-300' },
+  { name: 'Crime', link: '/movie/genre/crime', color: 'text-yellow-300' },
+  { name: 'Horror', link: '/movie/genre/horror', color: 'text-red-300' },
+  { name: 'Comedy', link: '/movie/genre/comedy', color: 'text-green-300' },
+  { name: 'Romance', link: '/movie/genre/romance', color: 'text-pink-400' },
+  { name: 'Thriller', link: '/movie/genre/thriller', color: 'text-indigo-300' },
+  { name: 'Mystery', link: '/movie/genre/mystery', color: 'text-gray-300' },
+  { name: 'War', link: '/movie/genre/war', color: 'text-amber-300' },
+  { name: 'Fantasy', link: '/movie/genre/fantasy', color: 'text-teal-300' },
+];
+
+// API functions
+const API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+const BASE_URL = 'https://api.themoviedb.org/3';
+
+async function getTrendingDaily() {
+  try {
+    const response = await fetch(`${BASE_URL}/trending/all/day?api_key=${API_KEY}&language=en-US&page=1`, {
+      next: { revalidate: 3600 } // Revalidate every hour
+    });
+    const data = await response.json();
+    return data.results || [];
+  } catch (error) {
+    console.error('Error fetching trending content:', error);
+    return [];
+  }
+}
+
+// Utility function untuk membuat slug TANPA ID
+const createMovieSlug = (item) => {
+  const title = item.title || item.name;
+  if (!title) return 'unknown';
+  
+  const baseSlug = title.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+  
+  const year = item.release_date ? 
+    item.release_date.substring(0, 4) : 
+    (item.first_air_date ? item.first_air_date.substring(0, 4) : '2024');
+  
+  return `${baseSlug}-${year}`;
+};
+
+// MediaCard component untuk trending content
+const MediaCard = ({ item }) => {
+  const isTV = item.media_type === 'tv' || item.name;
+  const title = item.title || item.name;
+  const date = isTV ? item.first_air_date : item.release_date;
+  const year = date ? new Date(date).getFullYear() : 'TBA';
+  
+  const slug = createMovieSlug(item);
+  
   return (
-    <div className="min-h-screen bg-slate-900 text-gray-300">
-      {/* Hero Section dengan Optimasi SEO */}
-      <div className="bg-gradient-to-b from-purple-900/50 to-slate-900 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-5xl font-extrabold mb-5 text-orange-400">
-            Justwatch - Ultimate Movie & TV Series Database - Your Complete Cinema Guide
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto">
-            Your comprehensive guide to 10,000+ movies, 5,000+ TV series, actor profiles, genre pages, and streaming information.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <Link href="/movie/popular" className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-              <FaFilm /> Browse Movies
-            </Link>
-            <Link href="/tv-show/popular" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-              <FaTv /> Browse TV Series
-            </Link>
-            <Link href="/people" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-              <FaUser /> Explore Actors
-            </Link>
-            <Link href="/rankings" className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-              <FaTrophy /> Top Rankings
-            </Link>
+    <div className="bg-slate-800 rounded-lg overflow-hidden border border-slate-700 hover:border-slate-600 transition-colors" itemScope itemType={isTV ? "https://schema.org/TVSeries" : "https://schema.org/Movie"}>
+      <Link href={isTV ? `/tv-show/${slug}` : `/movie/${slug}`} className="block">
+        <div className="relative aspect-[2/3] overflow-hidden">
+          {item.poster_path ? (
+            <Image
+              src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+              alt={`${title} poster - ${isTV ? 'TV Series' : 'Movie'} from ${year}`}
+              width={500}
+              height={750}
+              className="object-cover w-full h-full"
+              unoptimized={false}
+              priority={false}
+              itemProp="image"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+              {isTV ? <FaTv className="text-4xl text-gray-500" /> : <FaFilm className="text-4xl text-gray-500" />}
+            </div>
+          )}
+          
+          {/* Type Badge */}
+          <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+            {isTV ? 'TV' : 'Movie'}
+          </div>
+          
+          {/* Rating */}
+          {item.vote_average > 0 && (
+            <div className="absolute top-2 right-2 bg-purple-900 text-white text-xs px-2 py-1 rounded font-bold flex items-center gap-1">
+              ⭐ {item.vote_average.toFixed(1)}
+            </div>
+          )}
+        </div>
+        
+        <div className="p-3">
+          <h3 className="font-semibold text-white text-sm line-clamp-1 mb-1" itemProp="name">
+            {title}
+          </h3>
+          <div className="flex items-center justify-between text-xs text-gray-400">
+            <span itemProp="datePublished">{year}</span>
+            <span className={`px-2 py-1 rounded ${isTV ? 'bg-blue-500/20 text-blue-300' : 'bg-purple-500/20 text-purple-300'}`}>
+              {isTV ? 'TV Series' : 'Movie'}
+            </span>
           </div>
         </div>
-      </div>
+      </Link>
+    </div>
+  );
+};
 
-      <div className="container mx-auto px-4 py-12">
-        {/* Main Content dengan Deskripsi SEO Extended */}
-        <div className="bg-gray-800/50 p-8 rounded-xl shadow-lg backdrop-blur-sm">
-          {/* Introduction dengan Konten SEO */}
-          <section className="mb-16">
-            <div className="text-center mb-12">
-              <img
-                src="https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg"
-                alt="Movie reels and cinema tickets - Ultimate movie database for film enthusiasts"
-                width={1024}
-                height={416}
-                className="rounded-xl shadow-2xl mx-auto mb-8"
-              />
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-orange-300">
-                Discover the World of Cinema with Justwatch - America's Premier Movie Database
-              </h2>
-              <div className="text-lg text-gray-400 max-w-4xl mx-auto space-y-4 text-justify">
-                <p>
-                  <strong>Justwatch</strong> is United America's most complete and comprehensive movie and TV series information platform, serving as the definitive online resource for cinephiles, film students, industry professionals, and casual viewers alike. Our platform provides meticulously curated, accurate data spanning over a century of cinematic history, from silent film classics to the latest blockbuster releases and trending TV series.
-                </p>
-                <p>
-                  As a premier movie database website, we offer more than just basic information - we deliver an immersive experience that includes detailed user reviews, comprehensive streaming guides across multiple platforms, in-depth actor and filmmaker profiles, complete genre archives, and sophisticated search capabilities that allow users to discover content based on countless criteria.
-                </p>
-                <p>
-                  Our database features an extensive collection of <strong>over 10,000 movies</strong> and <strong>5,000+ TV series</strong>, each with complete metadata including cast and crew details, production information, technical specifications, awards and nominations, box office performance, critical reception, and viewer ratings. We continuously update our database with new releases, ensuring our users have access to the most current information in the entertainment industry.
-                </p>
-              </div>
-            </div>
-          </section>
+// Breadcrumb Component
+const Breadcrumb = () => (
+  <nav className="container mx-auto px-4 py-2" aria-label="Breadcrumb">
+    <ol className="flex items-center space-x-2 text-sm text-gray-400">
+      <li>
+        <Link href="/" className="hover:text-white transition-colors" itemProp="item">
+          <span itemProp="name">Home</span>
+        </Link>
+        <meta itemProp="position" content="1" />
+      </li>
+      <li className="flex items-center">
+        <span className="mx-2">/</span>
+      </li>
+      <li className="text-white" aria-current="page">
+        <span itemProp="name">Trending Movies & TV Shows</span>
+        <meta itemProp="position" content="2" />
+      </li>
+    </ol>
+  </nav>
+);
 
-          {/* SEO-Optimized Description Section - Minimal 2000 Kata */}
-          <section className="mb-16 bg-gray-900/50 p-8 rounded-xl">
-            <h2 className="text-3xl font-bold mb-8 text-center text-orange-300">
-              Complete Guide to Movies, TV Series, and Cinema Database
-            </h2>
-            
-            <div className="space-y-6 text-gray-400 text-justify">
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Introduction to Justwatch Database</h3>
-              
-              <p>
-                Welcome to <strong>Justwatch</strong>, the ultimate destination for movie enthusiasts and television series fans. Our platform represents the culmination of years of data collection, curation, and user experience optimization, designed to serve as the most reliable and comprehensive online resource for cinematic information. Whether you're researching a classic film, discovering new TV shows, or exploring actor filmographies, our database provides unparalleled depth and accuracy.
-              </p>
+export default async function HomePage() {
+  let trendingContent = [];
+  let movieCount = 0;
+  let tvCount = 0;
 
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Comprehensive Movie Database Features</h3>
-              
-              <p>
-                Our movie database stands as one of the most extensive collections of film information available online. Each movie entry includes complete production details, comprehensive cast and crew listings, detailed plot summaries, critical reviews, audience ratings, technical specifications, and streaming availability across multiple platforms. We cover films from every era and genre, including Hollywood blockbusters, independent films, international cinema, documentary features, animated films, and cult classics.
-              </p>
+  try {
+    const trendingData = await getTrendingDaily();
+    
+    trendingContent = trendingData
+      .filter(item => item.poster_path)
+      .slice(0, 20);
+    
+    movieCount = trendingContent.filter(item => item.media_type === 'movie' || item.title).length;
+    tvCount = trendingContent.filter(item => item.media_type === 'tv' || item.name).length;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
 
-              <p>
-                The database features advanced filtering capabilities allowing users to search movies by year, genre, director, actor, language, country of origin, runtime, MPAA rating, and more. Each film profile includes related recommendations, similar movies, trivia, goofs, quotes, soundtrack information, and behind-the-scenes details. Our streaming guide shows exactly where each movie is available to watch, whether on Netflix, Amazon Prime, Hulu, Disney+, HBO Max, or other streaming services.
-              </p>
+  // Schema Markup untuk SEO
+  const schemaMarkup = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://justwatch-id.vercel.app/#website",
+        "url": "https://justwatch-id.vercel.app/",
+        "name": "JustWatch",
+        "description": "Discover trending movies and TV series to stream today across Netflix, Disney+, Prime Video, Hulu, HBO Max and other streaming platforms",
+        "potentialAction": [{
+          "@type": "SearchAction",
+          "target": "https://justwatch-id.vercel.app/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }],
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://justwatch-id.vercel.app/#webpage",
+        "url": "https://justwatch-id.vercel.app/",
+        "name": "JustWatch | Trending Movies & TV Shows to Stream Today",
+        "description": "Watch trending movies and TV series for free. Discover what's popular today across Netflix, Disney+, Prime Video. Daily updated trending content.",
+        "isPartOf": { "@id": "https://justwatch-id.vercel.app/#website" },
+        "about": "Movie and TV show streaming guide",
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg",
+          "width": 1200,
+          "height": 630
+        },
+        "datePublished": "2024-01-01",
+        "dateModified": new Date().toISOString().split('T')[0],
+        "breadcrumb": { "@id": "https://justwatch-id.vercel.app/#breadcrumb" }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://justwatch-id.vercel.app/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://justwatch-id.vercel.app/"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How often is trending content updated on JustWatch?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We update trending movies and TV shows daily with the latest data from all major streaming platforms including Netflix, Disney+, Prime Video, Hulu, and HBO Max."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I find where to stream movies for free on JustWatch?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! JustWatch provides information on both free streaming options (ad-supported platforms) and premium subscription services, helping you find the most cost-effective way to watch your favorite content."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does JustWatch cover international movies and TV shows?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Absolutely. We track trending content from Hollywood blockbusters to international cinema, including anime, Korean dramas, European films, and content from around the world."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does JustWatch determine what's trending?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Our algorithm analyzes daily popularity spikes, social media buzz, streaming platform data, and viewer engagement metrics to determine what people are watching right now across all major services."
+            }
+          }
+        ]
+      }
+    ]
+  };
 
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">TV Series Database and Episode Guides</h3>
-              
-              <p>
-                Our TV series database provides exhaustive information on thousands of television shows from around the world. Each series includes complete episode guides with detailed summaries, air dates, director and writer credits, guest stars, and viewer ratings for individual episodes. We cover everything from classic sitcoms and drama series to reality TV, anime, documentaries, and limited series.
-              </p>
+  return (
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* JSON-LD Schema Markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+      />
+      
+      {/* Breadcrumb Navigation */}
+      <Breadcrumb />
 
-              <p>
-                The database includes comprehensive season breakdowns, character profiles, series timelines, awards and nominations, behind-the-scenes features, and cancellation or renewal status updates. Our streaming information shows which platforms carry each series and which seasons are available. We also provide information on international availability and regional restrictions where applicable.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Actor and Filmmaker Profiles</h3>
-              
-              <p>
-                Our people database features detailed profiles for actors, directors, producers, writers, cinematographers, composers, and other industry professionals. Each profile includes biographical information, career timelines, filmography with role details, awards and nominations, personal trivia, and high-quality photo galleries. We track career developments, upcoming projects, and industry news for thousands of entertainment professionals.
-              </p>
-
-              <p>
-                The database allows users to explore connections between industry professionals, see who frequently collaborates with whom, and discover new talent based on their interests. Each profile includes related content recommendations and career highlights, making it easy to explore an individual's body of work comprehensively.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Genre Exploration and Categorization</h3>
-              
-              <p>
-                Our genre system provides sophisticated categorization that goes beyond basic labels. We offer detailed genre pages for categories including Action, Adventure, Animation, Biography, Comedy, Crime, Documentary, Drama, Family, Fantasy, Film-Noir, History, Horror, Music, Musical, Mystery, Romance, Sci-Fi, Sport, Thriller, War, and Western. Each genre page includes sub-genre breakdowns, historical context, notable examples, and recommendations.
-              </p>
-
-              <p>
-                Beyond traditional genres, we also categorize content by mood, theme, setting, and style. Users can discover movies and series based on specific themes like time travel, coming-of-age, heist films, courtroom dramas, or specific historical periods. This sophisticated categorization system helps users discover content that matches their specific interests and preferences.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Year and Decade Archives</h3>
-              
-              <p>
-                Our historical archives allow users to explore cinema chronologically. Each year page shows all movies released in that year, sorted by popularity, critical reception, and box office performance. Decade overviews provide context about cinematic trends, technological developments, and cultural influences that shaped each era of filmmaking.
-              </p>
-
-              <p>
-                The archives include special sections for significant years in cinema history, such as 1939 (often called "Hollywood's Greatest Year"), 1975 (the birth of the modern blockbuster), and 1999 (a landmark year for independent and mainstream cinema). Each archive page includes historical context, notable trends, award winners, and cultural impact analysis.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Ratings, Rankings, and User Reviews</h3>
-              
-              <p>
-                Our comprehensive rating system aggregates scores from major critics, industry awards, and user reviews to provide balanced, reliable evaluations of movies and TV series. The ranking system includes "Best of All Time" lists, annual rankings, genre-specific rankings, and specialized lists like "Hidden Gems," "Cult Classics," and "Award Winners."
-              </p>
-
-              <p>
-                User reviews on Justwatch come from verified viewers and include detailed analysis, spoiler warnings, and content advisories. Our review system encourages thoughtful criticism and helpful recommendations, creating a community of engaged film enthusiasts who contribute to the platform's depth and value.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Streaming Guide and Availability</h3>
-              
-              <p>
-                One of our most valuable features is the comprehensive streaming guide that shows exactly where every movie and TV series is available to watch. We track availability across dozens of streaming platforms including subscription services, rental services, free platforms, and broadcast television. Our database includes region-specific information and regularly updates to reflect changing licensing agreements.
-              </p>
-
-              <p>
-                The streaming guide includes price comparisons, quality options (SD, HD, 4K), availability dates, and expiration warnings. We also provide information on physical media availability (DVD, Blu-ray, 4K UHD) and digital purchase options across various platforms.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Advanced Search and Discovery Tools</h3>
-              
-              <p>
-                Our advanced search functionality allows users to find content based on incredibly specific criteria. Search by multiple actors simultaneously, combine genre filters, set runtime ranges, specify release date windows, filter by country of origin, language, MPAA rating, color vs black-and-white, aspect ratio, and countless other technical and creative parameters.
-              </p>
-
-              <p>
-                The discovery engine uses sophisticated algorithms to recommend content based on viewing history, ratings, and stated preferences. Our "If You Like" system suggests similar content, while our "Explore" features help users discover new genres, directors, and actors they might enjoy based on their established interests.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Educational and Research Resources</h3>
-              
-              <p>
-                Justwatch serves as a valuable resource for film students, researchers, and educators. Our database includes academic citations, production histories, critical analysis, and cultural context for thousands of films. We provide resources for studying film theory, cinematic techniques, industry history, and cultural impact.
-              </p>
-
-              <p>
-                Special sections cover film movements (French New Wave, German Expressionism, Italian Neorealism), technological developments (transition to sound, color film, digital cinema), and industry trends. These resources make Justwatch an essential tool for anyone studying or teaching film and media.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Community Features and User Engagement</h3>
-              
-              <p>
-                Our platform fosters an engaged community of film enthusiasts through discussion forums, watch parties, user lists, and social features. Users can create and share custom lists, participate in polls and quizzes, join genre-specific communities, and contribute to our growing database through our moderated submission system.
-              </p>
-
-              <p>
-                Regular features include weekly watch recommendations, director spotlights, genre deep-dives, and historical retrospectives. Our community calendar highlights film festivals, special screenings, anniversaries, and industry events of interest to our users.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Mobile Experience and Accessibility</h3>
-              
-              <p>
-                Justwatch is fully optimized for mobile devices, with responsive design that works perfectly on smartphones and tablets. Our mobile app (available on iOS and Android) provides all the features of the desktop site with additional mobile-specific functionality including watchlist synchronization, offline access to saved information, and push notifications for availability updates.
-              </p>
-
-              <p>
-                We prioritize accessibility with features including screen reader compatibility, keyboard navigation, adjustable text sizes, high contrast modes, and closed captioning information for all video content. Our commitment to accessibility ensures that all users, regardless of ability, can fully experience and benefit from our database.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Data Accuracy and Regular Updates</h3>
-              
-              <p>
-                Maintaining data accuracy is our highest priority. We employ a combination of automated data collection, manual verification, and community contributions to ensure information correctness. Our team of editors regularly reviews and updates entries, correcting errors and adding new information as it becomes available.
-              </p>
-
-              <p>
-                We track industry announcements, press releases, and official sources to provide the most current information about upcoming releases, casting news, production updates, and streaming availability changes. Our update schedule ensures that users always have access to the latest and most accurate information.
-              </p>
-
-              <h3 className="text-2xl font-semibold text-blue-300 mb-4">Conclusion: Your Ultimate Cinema Resource</h3>
-              
-              <p>
-                Justwatch represents more than just a database - it's a comprehensive ecosystem for film discovery, education, and appreciation. Whether you're a casual viewer looking for something to watch tonight, a film student researching cinematic history, an industry professional verifying credits, or a cinephile exploring new horizons, our platform provides the tools, information, and community to enhance your cinematic journey.
-              </p>
-
-              <p>
-                With our commitment to accuracy, comprehensiveness, and user experience, Justwatch continues to set the standard for online movie databases. Join our growing community of film enthusiasts and discover why we're recognized as the premier destination for cinematic information and discovery.
-              </p>
-            </div>
-          </section>
-
-          {/* Features Grid */}
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold mb-12 text-center text-orange-300">
-              Complete Movie Database Features
-            </h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-gray-700/50 p-6 rounded-xl text-center">
-                <FaFilm className="text-4xl text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Movie Details</h3>
-                <p className="text-gray-400 text-justify">Complete information, cast, reviews, and streaming availability for thousands of films</p>
-              </div>
-              <div className="bg-gray-700/50 p-6 rounded-xl text-center">
-                <FaTv className="text-4xl text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">TV Series Database</h3>
-                <p className="text-gray-400 text-justify">Complete episode guides, season information, and streaming details for television shows</p>
-              </div>
-              <div className="bg-gray-700/50 p-6 rounded-xl text-center">
-                <FaUser className="text-4xl text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Actor Profiles</h3>
-                <p className="text-gray-400 text-justify">Detailed actor information with complete filmography and career highlights</p>
-              </div>
-              <div className="bg-gray-700/50 p-6 rounded-xl text-center">
-                <FaCalendar className="text-4xl text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Year Archives</h3>
-                <p className="text-gray-400 text-justify">Browse movies by release year and explore historical decades of cinema</p>
-              </div>
-              <div className="bg-gray-700/50 p-6 rounded-xl text-center">
-                <FaTrophy className="text-4xl text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Top Rankings</h3>
-                <p className="text-gray-400 text-justify">Highest rated movies and TV series across all categories and genres</p>
-              </div>
-              <div className="bg-gray-700/50 p-6 rounded-xl text-center">
-                <FaSearch className="text-4xl text-orange-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3">Advanced Search</h3>
-                <p className="text-gray-400 text-justify">Find content by multiple criteria and sophisticated filters for precise discovery</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Detailed Sections dengan text-justify */}
-          <section className="mb-16">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <h3 className="text-2xl font-bold mb-4 text-orange-300">Complete Movie Information Database</h3>
-                <div className="text-gray-400 mb-4 text-justify space-y-3">
-                  <p>
-                    Access comprehensive details for every movie in our extensive database with complete metadata, production information, and streaming availability across all major platforms.
-                  </p>
-                  <ul className="space-y-2 ml-4">
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Complete cast and crew information with role details and biographical data</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>User reviews and professional critic ratings aggregated from multiple sources</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Streaming platform availability across subscription, rental, and free services</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Trailers, teasers, behind-the-scenes footage, and official video content</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Similar movie recommendations and algorithmically generated related content</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Release dates, box office data, production budgets, and financial performance</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Technical specifications including runtime, aspect ratio, color process, and sound</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Awards, nominations, festival screenings, and critical reception analysis</span>
-                    </li>
-                  </ul>
-                </div>
-                <Link href="/movie/popular" className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-                  <FaFilm /> Explore Complete Movie Database
-                </Link>
-              </div>
-              <div className="bg-gray-700/30 p-6 rounded-xl">
-                <img
-                  src="https://images.unsplash.com/photo-1594909122845-11baa439b7bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                  alt="Comprehensive movie database interface with detailed film information and streaming options"
-                  className="rounded-lg shadow-lg"
-                />
-              </div>
-            </div>
-          </section>
-
-          <section className="mb-16">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="bg-gray-700/30 p-6 rounded-xl order-2 lg:order-1">
-                <img
-                  src="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                  alt="Actor profiles and filmography database with career information and movie credits"
-                  className="rounded-lg shadow-lg"
-                />
-              </div>
-              <div className="order-1 lg:order-2">
-                <h3 className="text-2xl font-bold mb-4 text-orange-300">Actor & People Profiles Database</h3>
-                <div className="text-gray-400 mb-4 text-justify space-y-3">
-                  <p>
-                    Discover detailed information about your favorite actors, directors, and industry professionals with comprehensive career data and filmography listings.
-                  </p>
-                  <ul className="space-y-2 ml-4">
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Complete biography, personal details, and career milestones with timeline</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Full filmography with role details, release dates, and production information</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>TV series appearances, guest roles, and recurring character information</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Awards, nominations, honors, and industry recognition with ceremony details</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Upcoming projects, current productions, and announced future work</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>High-quality photos, media galleries, interview transcripts, and public appearances</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Collaboration networks showing frequent co-stars and creative partnerships</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-orange-400 mr-2">•</span>
-                      <span>Educational background, training, and professional development information</span>
-                    </li>
-                  </ul>
-                </div>
-                <Link href="/people" className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-                  <FaUser /> Browse Complete Actor Database
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Call to Action dengan Optimasi SEO */}
-          <section className="text-center py-12 bg-gradient-to-r from-orange-900/30 to-purple-900/30 rounded-xl">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-orange-300">
-              Start Your Cinematic Journey with Justwatch Today
-            </h2>
-            <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto text-justify">
-              Join our community of film enthusiasts accessing the most comprehensive movie and TV series database available online. With thousands of verified entries, real-time updates, and sophisticated discovery tools, Justwatch provides everything you need to explore, research, and enjoy the world of cinema.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/movie/365-days-this-day-2022/stream" className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors flex items-center gap-2">
-                <FaFilm /> Start Exploring Movies
-              </Link>
-              <Link href="/tv-show/popular" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors flex items-center gap-2">
-                <FaTv /> Browse TV Series Database
-              </Link>
-            </div>
-            <p className="mt-8 text-gray-400 max-w-3xl mx-auto text-justify">
-              <strong>Justwatch</strong> - Your ultimate resource for movie information, TV series details, actor profiles, streaming guides, and cinematic discovery. Whether you're researching film history, planning your viewing schedule, or simply exploring the vast world of cinema, we provide the comprehensive database, accurate information, and intuitive tools you need to enhance your movie-watching experience and deepen your understanding of film as an art form and cultural phenomenon.
-            </p>
-          </section>
+      {/* Hero Section dengan H1 yang dioptimalkan */}
+      <section className="relative bg-gradient-to-r from-purple-900/80 to-slate-900 py-16 lg:py-20" itemScope itemType="https://schema.org/WPHeader">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 text-white" itemProp="headline">
+            JustWatch | Trending Movies & TV Shows to Stream Today
+          </h1>
+          <p className="text-base md:text-lg text-gray-300 max-w-2xl mx-auto" itemProp="description">
+            Discover what's trending right now across all streaming platforms. Daily updated with the hottest movies and TV series available to watch online.
+          </p>
+          
+          {/* LSI Keywords Section */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            <span className="bg-slate-800/50 text-gray-300 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+              <FaVideo className="text-xs" /> binge-watch series
+            </span>
+            <span className="bg-slate-800/50 text-gray-300 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+              <FaSearch className="text-xs" /> movie recommendations
+            </span>
+            <span className="bg-slate-800/50 text-gray-300 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+              <FaCalendarAlt className="text-xs" /> new releases 2024
+            </span>
+            <span className="bg-slate-800/50 text-gray-300 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+              <FaStar className="text-xs" /> top rated shows
+            </span>
+            <span className="bg-slate-800/50 text-gray-300 text-sm px-3 py-1 rounded-full flex items-center gap-1">
+              <FaTv className="text-xs" /> streaming guide
+            </span>
+          </div>
         </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Trending Content Section */}
+        <section className="mb-16" itemScope itemType="https://schema.org/ItemList">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <h2 className="text-2xl font-bold flex items-center gap-3">
+              <FaFire className="text-red-500 text-2xl" />
+              Trending Today
+              <span className="text-sm bg-blue-800 text-white px-2 py-1 rounded-full">Daily Updates</span>
+            </h2>
+            <div className="text-sm text-gray-400">
+              <span className="text-blue-300">{movieCount} Movies</span> • 
+              <span className="text-purple-300 ml-2">{tvCount} TV Shows</span>
+            </div>
+          </div>
+          
+          {trendingContent.length > 0 ? (
+            <>
+              <meta itemProp="name" content="Trending Movies & TV Shows Today" />
+              <meta itemProp="description" content="Daily updated list of trending movies and TV series across all streaming platforms" />
+              <meta itemProp="numberOfItems" content={trendingContent.length} />
+              
+              {/* Grid for trending content */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6 mb-8">
+                {trendingContent.map((item, index) => (
+                  <div key={`${item.id}-${item.media_type}`} itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+                    <meta itemProp="position" content={index + 1} />
+                    <MediaCard item={item} />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Daily Stats */}
+              <div className="bg-slate-800/50 p-6 rounded-xl mb-8">
+                <h3 className="text-xl font-semibold mb-4 text-center text-orange-300">Today's Trending Stats</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="bg-slate-700/50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-white">{trendingContent.length}</div>
+                    <div className="text-gray-300 text-sm">Total Trending Items</div>
+                  </div>
+                  <div className="bg-slate-700/50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-blue-300">{movieCount}</div>
+                    <div className="text-gray-300 text-sm">Trending Movies</div>
+                  </div>
+                  <div className="bg-slate-700/50 p-4 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-purple-300">{tvCount}</div>
+                    <div className="text-gray-300 text-sm">Trending TV Shows</div>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12 bg-slate-800 rounded-lg border border-slate-700">
+              <FaFire className="text-4xl text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-400">No trending content available at the moment. Check back soon!</p>
+            </div>
+          )}
+        </section>
+
+        {/* SEO-Optimized About Section dengan LSI Keywords tambahan */}
+        <section className="mb-16 bg-slate-800/50 p-6 md:p-8 rounded-xl">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center text-orange-300">
+            JustWatch: Your Ultimate Streaming Discovery Platform
+          </h2>
+          
+          <div className="space-y-6 text-gray-300">
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">What is JustWatch?</h3>
+            
+            <p>
+              JustWatch is America's premier movie and TV show discovery platform that answers the most common search queries like <strong>"what's trending on Netflix today"</strong>, <strong>"best movies to watch right now"</strong>, <strong>"top TV shows this week"</strong>, and <strong>"where to stream new releases"</strong>. We provide real-time trending data across all major streaming platforms including Netflix, Disney+, Amazon Prime Video, Hulu, HBO Max, Apple TV+, and free streaming services.
+            </p>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Daily Trending Updates</h3>
+            
+            <p>
+              Unlike traditional movie databases, JustWatch focuses on what's trending right now. Our algorithm tracks daily <strong>popularity spikes</strong>, <strong>social media buzz</strong>, and <strong>streaming platform data</strong> to show you exactly what people are watching today. Whether you're searching for <strong>"trending movies 2024"</strong>, <strong>"popular TV series this month"</strong>, or <strong>"what to watch tonight"</strong>, we deliver up-to-the-minute recommendations based on real-world viewing patterns.
+            </p>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Streaming Availability & Platform Integration</h3>
+            
+            <p>
+              Every trending title on JustWatch includes detailed <strong>streaming information</strong> showing exactly where you can watch it. We track availability across Netflix, Disney+, Prime Video, Hulu, HBO Max, Peacock, Paramount+, and free ad-supported platforms. Our platform answers queries like <strong>"where to watch [movie title] free"</strong>, <strong>"is [TV show] on Netflix"</strong>, and <strong>"streaming services with [movie]"</strong>. We also monitor regional availability and subscription requirements.
+            </p>
+
+            {/* Popular Genres Section in About */}
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Explore Popular Genres</h3>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+              {genres.map((genre, index) => (
+                <Link 
+                  key={index} 
+                  href={genre.link}
+                  className="bg-gray-700/50 p-4 rounded-lg hover:bg-gray-600/50 transition flex flex-col items-center justify-center"
+                >
+                  <div className={`font-semibold ${genre.color}`}>
+                    {genre.name}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Browse {genre.name} →
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Comprehensive Content Discovery</h3>
+            
+            <p>
+              JustWatch helps you discover content across all genres including <strong>Action</strong>, <strong>Adventure</strong>, <strong>Sci-Fi</strong>, <strong>Anime</strong>, <strong>Crime</strong>, <strong>Horror</strong>, <strong>Comedy</strong>, <strong>Romance</strong>, <strong>Thriller</strong>, <strong>Mystery</strong>, <strong>War</strong>, <strong>Fantasy</strong>, and more. Each trending item includes ratings, reviews, cast information, and similar recommendations. We answer search queries like <strong>"movies like [favorite film]"</strong>, <strong>"best [genre] shows on [platform]"</strong>, and <strong>"top rated [genre] movies 2024"</strong>.
+            </p>
+
+            {/* FAQ Section dengan Schema Markup */}
+            <div className="bg-slate-900/50 p-6 rounded-lg mt-8">
+              <h3 className="text-xl md:text-2xl font-semibold text-orange-300 mb-4 flex items-center gap-2">
+                <FaQuestionCircle /> Frequently Asked Questions
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="faq-item" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                  <h4 className="font-semibold text-blue-300 mb-2" itemProp="name">How often is trending content updated on JustWatch?</h4>
+                  <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                    <p className="text-gray-300" itemProp="text">
+                      We update trending movies and TV shows daily with the latest data from all major streaming platforms including Netflix, Disney+, Prime Video, Hulu, and HBO Max.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="faq-item" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                  <h4 className="font-semibold text-blue-300 mb-2" itemProp="name">Can I find where to stream movies for free on JustWatch?</h4>
+                  <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                    <p className="text-gray-300" itemProp="text">
+                      Yes! JustWatch provides information on both free streaming options (ad-supported platforms) and premium subscription services, helping you find the most cost-effective way to watch your favorite content.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="faq-item" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                  <h4 className="font-semibold text-blue-300 mb-2" itemProp="name">Does JustWatch cover international movies and TV shows?</h4>
+                  <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                    <p className="text-gray-300" itemProp="text">
+                      Absolutely. We track trending content from Hollywood blockbusters to international cinema, including anime, Korean dramas, European films, and content from around the world.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="faq-item" itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                  <h4 className="font-semibold text-blue-300 mb-2" itemProp="name">How does JustWatch determine what's trending?</h4>
+                  <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                    <p className="text-gray-300" itemProp="text">
+                      Our algorithm analyzes daily popularity spikes, social media buzz, streaming platform data, and viewer engagement metrics to determine what people are watching right now across all major services.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Quality & Viewing Experience</h3>
+            
+            <p>
+              We prioritize viewing quality by highlighting availability in <strong>HD</strong>, <strong>4K</strong>, <strong>HDR</strong>, and <strong>Dolby</strong> formats. Each listing includes content ratings, episode guides for TV series, parental guidance, and accessibility features. JustWatch helps users make informed decisions about what to watch based on quality preferences and viewing restrictions.
+            </p>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Why Choose JustWatch Over Other Platforms?</h3>
+            
+            <p>
+              JustWatch stands out with its real-time trending algorithm, comprehensive streaming availability data, and user-friendly interface. While other platforms show static ratings or editorial picks, JustWatch dynamically updates based on what's actually being watched right now across all major streaming services. We combine critic scores with audience popularity and social buzz to give you the most accurate picture of what's worth your time.
+            </p>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Mobile-Optimized & Social Features</h3>
+            
+            <p>
+              Our platform is fully optimized for mobile devices, allowing you to discover trending content on the go. Create personalized watchlists, follow specific actors or directors, receive notifications when trending titles become available on your preferred platforms, and share recommendations with friends. JustWatch integrates with social media to show you what your friends are watching and discussing.
+            </p>
+
+            <h3 className="text-xl md:text-2xl font-semibold text-blue-300 mb-4">Start Your Streaming Journey Today</h3>
+            
+            <p>
+              Join millions of users who trust JustWatch to answer their <strong>"what to watch"</strong> questions. Whether you're searching for <strong>"trending Netflix shows today"</strong>, <strong>"popular movies on Prime Video this week"</strong>, <strong>"new releases on Disney+"</strong>, or <strong>"free streaming movies"</strong>, JustWatch provides accurate, timely information to enhance your entertainment experience. Our platform continuously monitors streaming trends, new releases, and audience preferences to ensure you never miss out on must-watch content.
+            </p>
+          </div>
+        </section>
+
+        {/* Final Call to Action */}
+        <section className="text-center py-12 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-2xl border border-slate-700">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">Never Miss What's Trending</h2>
+          <p className="text-base md:text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+            Get daily updates on the hottest movies and TV shows across all streaming platforms. Discover binge-worthy series, movie recommendations, and new releases 2024.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link 
+              href="/movie/popular" 
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            >
+              <FaFilm /> Browse Movies
+            </Link>
+            <Link 
+              href="/tv-show/popular" 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            >
+              <FaTv /> Browse TV Series
+            </Link>
+            <Link 
+              href="/people" 
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            >
+              <FaUser /> Discover Actors
+            </Link>
+          </div>
+          <p className="mt-8 text-gray-400 max-w-3xl mx-auto text-xs md:text-sm">
+            JustWatch • Trending Movies & TV Shows • Daily Updates • Streaming Availability • Netflix • Disney+ • Prime Video • Hulu • HBO Max • Free Streaming • HD Quality • What to Watch • Best Movies 2024 • Popular TV Series • Entertainment Guide • Movie Recommendations • Binge-Watch Series • New Releases • Top Rated Shows
+          </p>
+        </section>
       </div>
     </div>
   );
 }
+
+// Metadata untuk SEO
+export const metadata = {
+  title: 'JustWatch | Trending Movies & TV Shows to Stream Today - Daily Updates',
+  description: 'Watch trending movies and TV series for free. Discover what\'s popular today across Netflix, Disney+, Prime Video. Daily updated trending content, movie recommendations, and binge-worthy series.',
+  keywords: 'trending movies, trending tv shows, watch online free, daily updates, Netflix trending, Disney+ new releases, streaming guide, movie recommendations, binge-watch series, what to watch, new releases 2024, top rated shows, popular TV series',
+  openGraph: {
+    title: 'JustWatch | Trending Movies & TV Shows to Stream Today',
+    description: 'Discover what\'s trending today across all streaming platforms. Daily updated with the hottest movies and TV series available to watch online.',
+    url: 'https://justwatch-id.vercel.app/',
+    siteName: 'JustWatch',
+    images: [
+      {
+        url: 'https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'JustWatch - Trending Movies & TV Series to Stream Today',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@JustWatchMovies',
+    creator: '@JustWatchMovies',
+    title: 'JustWatch | Trending Movies & TV Shows to Stream Today',
+    description: 'Discover what\'s trending today across all streaming platforms on JustWatch.',
+    images: ['https://live.staticflickr.com/65535/54797489364_45a23b2498_b.jpg'],
+  },
+  alternates: {
+    canonical: 'https://justwatch-id.vercel.app/',
+  },
+};
+
+export const dynamic = 'force-dynamic';
